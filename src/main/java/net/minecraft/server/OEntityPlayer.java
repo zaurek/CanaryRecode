@@ -1129,6 +1129,8 @@ public abstract class OEntityPlayer extends OEntityLiving {
     }
 
     public void g(int var1) {
+    	if(var1<0)
+    		throw new IllegalArgumentException("cannot remove negative xp value");
         this.q += var1;
         int var2 = Integer.MAX_VALUE - this.N;
         if (var1 > var2) {
@@ -1147,16 +1149,25 @@ public abstract class OEntityPlayer extends OEntityLiving {
     //called levelDown() method
     public void removeXP(int var1) {
     	if(var1<0)
-    		throw new IllegalArgumentException("cannot remove negative value");
+    		throw new IllegalArgumentException("cannot remove negative xp value");
         this.q -= var1;
         this.O -= (float) var1 / (float) this.ae();
         this.N -= var1;
         levelDown();
     }
     
+    public void setXP(int xp) {
+    	if(xp<0)
+    		throw new IllegalArgumentException("cannot set negative xp value");
+        this.N = 0;
+        this.M = 0;
+        this.O = 0;
+        this.g(xp);
+    }
+    
     public void levelDown(){
     	while(this.O < 0) {
-    	    this.O = ae()*(this.O)/ae(this.N-1);
+    	    this.O = ae()*(this.O)/ae(this.M-1);
     	    this.O++;
     	    e_(1);
     	}
