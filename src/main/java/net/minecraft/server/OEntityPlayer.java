@@ -1143,6 +1143,25 @@ public abstract class OEntityPlayer extends OEntityLiving {
         }
 
     }
+    //added check weather @param is positive
+    //called levelDown() method
+    public void removeXP(int var1) {
+    	if(var1<0)
+    		throw new IllegalArgumentException("cannot remove negative value");
+        this.q -= var1;
+        this.O -= (float) var1 / (float) this.ae();
+        this.N -= var1;
+        levelDown();
+    }
+    
+    public void levelDown(){
+    	while(this.O < 0) {
+    	    this.O = ae()*(this.O)/ae(this.N-1);
+    	    this.O++;
+    	    e_(1);
+    	}
+    }
+
 
     public void e_(int var1) {
         this.M -= var1;
@@ -1154,6 +1173,12 @@ public abstract class OEntityPlayer extends OEntityLiving {
 
     public int ae() {
         return 7 + (this.M * 7 >> 1);
+    }
+    
+    public int ae(int level) {
+    	if(level < 0)
+    		level = 0;
+        return 7 + (level * 7 >> 1);
     }
 
     private void H() {
