@@ -12,6 +12,7 @@ import net.canarymod.Logman;
 import net.canarymod.api.CanaryServer;
 import net.canarymod.api.NetServerHandler;
 import net.canarymod.api.Packet;
+import net.canarymod.api.inventory.CanaryPlayerInventory;
 import net.canarymod.api.inventory.Inventory;
 import net.canarymod.api.inventory.Item;
 import net.canarymod.api.world.CanaryDimension;
@@ -33,6 +34,7 @@ import net.minecraft.server.OBlock;
 import net.minecraft.server.OChunkCoordinates;
 import net.minecraft.server.OEntityPlayer;
 import net.minecraft.server.OEntityPlayerMP;
+import net.minecraft.server.OItemStack;
 import net.minecraft.server.OMinecraftServer;
 import net.minecraft.server.OPacket;
 import net.minecraft.server.OPacket70Bed;
@@ -109,7 +111,8 @@ public class CanaryPlayer extends CanaryEntityLiving implements Player {
                 ArrayList<Player> receivers = new ArrayList<Player>(Canary.getServer().getPlayerList()); // shadow copy the list for size matching
                 Collections.copy(receivers, Canary.getServer().getPlayerList()); //Fully copy the list
                 
-                ChatHook hook = (ChatHook) Canary.hooks().callCancelableHook(new ChatHook(this, prefix, message, receivers));
+                ChatHook hook = new ChatHook(this, prefix, message, receivers);
+                Canary.hooks().callHook(hook);
                 if(hook.isCanceled()) {
                     return;
                 }
@@ -165,7 +168,7 @@ public class CanaryPlayer extends CanaryEntityLiving implements Player {
 
     @Override
     public void addExperience(int experience) {
-        ((OEntityPlayerMP)entity).g(experience);
+        ((OEntityPlayerMP)entity).addXP(experience);
     }
 
     @Override
@@ -180,6 +183,7 @@ public class CanaryPlayer extends CanaryEntityLiving implements Player {
 
     @Override
     public void setExperience(int xp) {
+        if(xp < 0) return;
         ((OEntityPlayerMP)entity).setXP(xp);
     }
 
@@ -208,9 +212,9 @@ public class CanaryPlayer extends CanaryEntityLiving implements Player {
 
     @Override
     public Item getItemHeld() {
-        OEntityPlayerMP player = (OEntityPlayerMP) entity;
-        if(player.k.d() != null) {
-            return player.k.d().getCanaryItem();
+        OItemStack item = ((CanaryPlayerInventory) getInventory()).getItemInHand();
+        if(item != null) {
+            return item.getCanaryItem();
         }
         return null;
     }
@@ -278,7 +282,8 @@ public class CanaryPlayer extends CanaryEntityLiving implements Player {
                 return Canary.getServer().consoleCommand(Canary.glueString(command, 0, " ").replace("/#", ""), this);
             }
             commandName = commandName.replace("/", "");
-            PlayerCommandHook hook = (PlayerCommandHook) Canary.hooks().callCancelableHook(new PlayerCommandHook(this, command));
+            PlayerCommandHook hook = new PlayerCommandHook(this, command);
+            Canary.hooks().callHook(hook);
             if (hook.isCanceled()) {
                 return true;
             } // someone wants us not to execute the command. So lets do them the favor

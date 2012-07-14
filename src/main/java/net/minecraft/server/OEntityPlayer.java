@@ -5,12 +5,12 @@ import java.util.List;
 
 import net.canarymod.Canary;
 import net.canarymod.api.entity.CanaryEntityItem;
-import net.canarymod.api.inventory.CanaryPlayerInventory;
+import net.canarymod.api.entity.Player;
 import net.canarymod.api.inventory.Inventory;
 import net.canarymod.config.Configuration;
-import net.canarymod.hook.CancelableHook;
 import net.canarymod.hook.Hook;
 import net.canarymod.hook.player.ItemHook;
+import net.canarymod.hook.player.LevelUpHook;
 import net.canarymod.hook.player.RightClickHook;
 import net.minecraft.server.OAchievementList;
 import net.minecraft.server.OAxisAlignedBB;
@@ -460,7 +460,8 @@ public abstract class OEntityPlayer extends OEntityLiving {
                 var3.br += Math.sin(var5) * var4;
             }
 
-            CancelableHook hook = (CancelableHook) Canary.hooks().callCancelableHook(new ItemHook(((OEntityPlayerMP)this).getPlayer(), new CanaryEntityItem(var3), true)); //ITEM_DROP
+            ItemHook hook = new ItemHook(((OEntityPlayerMP)this).getPlayer(), new CanaryEntityItem(var3), true);
+            Canary.hooks().callHook(hook); //ITEM_DROP
             if(hook.isCanceled()){
                 return null;
             }
@@ -707,7 +708,8 @@ public abstract class OEntityPlayer extends OEntityLiving {
         if (!var1.b(this)) {
             OItemStack var2 = this.U();
             if (var2 != null && var1 instanceof OEntityLiving) {
-                CancelableHook hook = (CancelableHook) Canary.hooks().callCancelableHook(new RightClickHook(((OEntityPlayerMP)this).getPlayer(), null, null, var2.getCanaryItem(),((OEntityLiving) var1).getCanaryEntityLiving(), Hook.Type.ENTITY_RIGHTCLICKED));
+                RightClickHook hook = new RightClickHook(((OEntityPlayerMP)this).getPlayer(), null, null, var2.getCanaryItem(),((OEntityLiving) var1).getCanaryEntityLiving(), Hook.Type.ENTITY_RIGHTCLICKED);
+                Canary.hooks().callHook(hook);
                 if(!hook.isCanceled()){
                     var2.a((OEntityLiving) var1);
                     if (var2.a <= 0) {
@@ -832,9 +834,9 @@ public abstract class OEntityPlayer extends OEntityLiving {
     @Override
     public void X() {
         super.X();
-        this.l.a(this);
+        this.l.onInventoryClose(this);
         if (this.m != null) {
-            this.m.a(this);
+            this.m.onInventoryClose(this);
         }
 
     }
@@ -1274,5 +1276,41 @@ public abstract class OEntityPlayer extends OEntityLiving {
     public Inventory getInventory(){
         return k.getInventory();
     }
+    
+    public void addXP(int var1) {
+        int var2 = Integer.MAX_VALUE - this.N;
+        if (var1 > var2) {
+            var1 = var2;
+        }
+        
+        this.q += var1;
+        this.O += (float) var1 / (float) this.ae();
+        this.N += var1;
+        levelUp();
+    }
+
+    public void removeXP(int var1) {
+        this.q -= var1;
+        this.O -= (float) var1 / (float) this.ae();
+        this.N -= var1;
+        levelUp();
+    }
+
+    public void setXP(int var1) {
+        this.q = var1;
+        this.O = (float) var1 / (float) this.ae();
+        this.N = var1;
+        levelUp();
+    }
+    
+    public void levelUp() {
+        for (; this.O >= 1.0F; this.O /= (float) this.ae()) {
+            this.O = (this.O - 1.0F) * (float) this.ae();
+            this.H();
+            LevelUpHook hook = new LevelUpHook((Player) getCanaryEntity());
+            Canary.hooks().callHook(hook);
+        }
+    }
+    
     //CanaryMod end
 }

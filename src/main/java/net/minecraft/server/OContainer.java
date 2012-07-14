@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import net.canarymod.Canary;
-import net.canarymod.api.entity.Player;
 import net.canarymod.api.inventory.Inventory;
 import net.canarymod.hook.player.InventoryHook;
 import net.minecraft.server.OEntityPlayer;
@@ -151,7 +150,7 @@ public abstract class OContainer {
                                     var10 = var12.a();
                                 }
 
-                                var12.craftCheck(var14.a(var10), ((OEntityPlayerMP) var4).getPlayer());
+                                var12.d(var14.a(var10));
                                 if (var14.a == 0) {
                                     var6.b((OItemStack) null);
                                 }
@@ -210,7 +209,7 @@ public abstract class OContainer {
         this.a(var1, var2, var3, var4);
     }
 
-    public void a(OEntityPlayer var1) {
+    public void onInventoryClose(OEntityPlayer var1) {
         Canary.hooks().callHook(new InventoryHook(((OEntityPlayerMP)var1).getPlayer(), this.inventory, true)); //CanaryMod - onCloseInventory
         OInventoryPlayer var2 = var1.k;
         if (var2.l() != null) {
@@ -306,10 +305,6 @@ public abstract class OContainer {
         }
 
         return var5;
-    }
-
-    public void getCraftResult(OIInventory oiInventory, Player player) {
-        a(oiInventory);
     }
     
     // CanaryMod: get and set inventory passed to the GUI.

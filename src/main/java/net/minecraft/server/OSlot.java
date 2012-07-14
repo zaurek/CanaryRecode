@@ -1,6 +1,5 @@
 package net.minecraft.server;
 
-import net.canarymod.api.entity.Player;
 import net.minecraft.server.OIInventory;
 import net.minecraft.server.OItemStack;
 
@@ -46,6 +45,10 @@ public class OSlot {
         return true;
     }
 
+    /**
+     * Get the itemstack of this slot
+     * @return
+     */
     public OItemStack b() {
         return this.b.g_(this.a);
     }
@@ -58,17 +61,6 @@ public class OSlot {
         this.b.a(this.a, var1);
         this.d();
     }
-    
-    public void craftCheck(OItemStack var1, Player player) {
-        if (this.b instanceof OInventoryCrafting){
-            ((OInventoryCrafting)this.b).setResult(this.a, var1, player);
-            this.d();
-        }
-        else{
-            this.b.a(this.a, var1);
-            this.d();
-        }
-    }
 
     public void d() {
         this.b.G_();
@@ -78,6 +70,11 @@ public class OSlot {
         return this.b.a();
     }
 
+    /**
+     * Decrease Stack size in this slot by the given var1
+     * @param var1
+     * @return
+     */
     public OItemStack a(int var1) {
         return this.b.a(this.a, var1);
     }
